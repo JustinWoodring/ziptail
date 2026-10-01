@@ -234,10 +234,10 @@ pub fn run(init: std.process.Init, dialog: *const Dialog) !Outcome {
         .tick, .focus_in => {},
         .mouse => |mouse| handleMouse(&vx, &current, &state, mouse, deck, init.environ_map),
     }
+    vx.queueRefresh();
     const layout = computeLayout(&vx, &current);
     if (layout.modern and !current.no_mouse) {
         try vx.setMouseMode(tty.writer(), true);
-        vx.setMouseShape(.pointer);
     }
 
     var image: ?vaxis.Image = null;
@@ -249,7 +249,7 @@ pub fn run(init: std.process.Init, dialog: *const Dialog) !Outcome {
     }
 
     var ticker: ?std.Io.Future(void) = null;
-    if (current.animate) ticker = try init.io.concurrent(tickLoop, .{ init.io, &loop });
+    if (current.kind == .presentation and current.animate) ticker = try init.io.concurrent(tickLoop, .{ init.io, &loop });
     defer {
         if (ticker) |*thread| thread.cancel(init.io);
     }
@@ -272,20 +272,37 @@ pub fn run(init: std.process.Init, dialog: *const Dialog) !Outcome {
 
     while (state.result == null) {
         const event = try loop.nextEvent();
+        var repaint = true;
         switch (event) {
-            .key_press => |key| try handleKey(&current, &state, key, allocator, deck, init.environ_map),
-            .winsize => |size| try vx.resize(init.gpa, tty.writer(), size),
+            .key_press => |key| {
+                const previous_screen = state.presentation_screen;
+                try handleKey(&current, &state, key, allocator, deck, init.environ_map);
+                if (state.presentation_screen != previous_screen) vx.queueRefresh();
+            },
+            .winsize => |size| {
+                try vx.resize(init.gpa, tty.writer(), size);
+                vx.queueRefresh();
+            },
             .gauge_update => |update| {
                 if (update.percent) |percent| state.gauge_percent = @min(percent, 100);
                 if (update.text) |text| state.gauge_text = text;
             },
             .gauge_done => state.result = .accepted,
-            .mouse => |mouse| handleMouse(&vx, &current, &state, mouse, deck, init.environ_map),
-            .tick => {
-                if (current.kind == .presentation and state.transition_frame < 5) state.transition_frame += 1;
+            .mouse => |mouse| {
+                const previous_screen = state.presentation_screen;
+                handleMouse(&vx, &current, &state, mouse, deck, init.environ_map);
+                if (state.presentation_screen != previous_screen) vx.queueRefresh();
             },
-            .focus_in => {},
+            .tick => {
+                if (current.kind == .presentation and state.transition_frame < 5) {
+                    state.transition_frame += 1;
+                } else {
+                    repaint = false;
+                }
+            },
+            .focus_in => repaint = false,
         }
+        if (!repaint) continue;
         frame +%= 1;
         try draw(&vx, &current, &state, frame, image, deck, init.environ_map);
         try vx.render(tty.writer());

@@ -6,7 +6,7 @@ if [ "$#" -eq 0 ]; then
   exit 2
 fi
 
-ziptail=${ZIPTAIL_BIN:-ziptail}
+ziptail=${ZIPTAIL_BIN:-./zig-out/bin/ziptail}
 script_dir=$(dirname "$0")
 log=$(mktemp "${TMPDIR:-/tmp}/ziptail-installer.XXXXXX") || exit 1
 trap 'rm -f "$log"' EXIT HUP INT TERM

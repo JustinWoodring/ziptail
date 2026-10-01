@@ -1,6 +1,6 @@
 #!/bin/sh
 set -u
-ziptail=${ZIPTAIL_BIN:-ziptail}
+ziptail=${ZIPTAIL_BIN:-./zig-out/bin/ziptail}
 
 {
   printf 'XXX\nConnecting to the package registry...\nXXX\n8\n'

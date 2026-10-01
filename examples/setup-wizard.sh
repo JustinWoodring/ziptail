@@ -1,7 +1,7 @@
 #!/bin/sh
 set -u
 
-ziptail=${ZIPTAIL_BIN:-ziptail}
+ziptail=${ZIPTAIL_BIN:-./zig-out/bin/ziptail}
 script_dir=$(dirname "$0")
 
 if "$ziptail" --title "First run" --msgbox "Let's configure your service." 8 48; then

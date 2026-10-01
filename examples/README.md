@@ -1,11 +1,11 @@
 # Examples
 
-Set `ZIPTAIL_BIN` when running from a checkout; otherwise each script uses `ziptail` from `PATH`.
+Build ziptail first with `zig build`, then run these scripts from the repository root. Each defaults to `./zig-out/bin/ziptail`; set `ZIPTAIL_BIN` to override the executable.
 
 ```sh
-ZIPTAIL_BIN=./zig-out/bin/ziptail ./examples/setup-wizard.sh
-ZIPTAIL_BIN=./zig-out/bin/ziptail ./examples/progress.sh
-ZIPTAIL_BIN=./zig-out/bin/ziptail ./examples/installer-flow.sh sh -c 'echo install log; exit 1'
+./examples/setup-wizard.sh
+./examples/progress.sh
+./examples/installer-flow.sh sh -c 'echo install log; exit 1'
 ```
 
 - `setup-wizard.sh`: message, yes/no, input, multi-field form, checklist, password, gauge, then a linked presentation.

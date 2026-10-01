@@ -180,14 +180,14 @@ fn modernTerminal(vx: *const vaxis.Vaxis) bool {
     const env = vx.env_map;
     const term = env.get("TERM") orelse "";
     if (std.mem.indexOf(u8, term, "256color") != null) return true;
-    inline for (&.{ "GHOSTTY_RESOURCES_DIR", "KITTY_WINDOW_ID", "WEZTERM_PANE", "VSCODE_IPC_HOOK_CLI", "WT_SESSION" }) |key| {
+    inline for (&.{ "GHOSTTY_RESOURCES_DIR", "KITTY_WINDOW_ID", "WEZTERM_PANE", "VSCODE_IPC_HOOK_CLI", "WT_SESSION", "COSMIC_SESSION" }) |key| {
         if (env.get(key)) |_| return true;
     }
     if (env.get("COLORTERM")) |value| {
         if (std.ascii.eqlIgnoreCase(value, "truecolor") or std.ascii.eqlIgnoreCase(value, "24bit")) return true;
     }
     if (env.get("TERM_PROGRAM")) |program| {
-        inline for (&.{ "vscode", "ghostty", "kitty", "wezterm", "alacritty", "iTerm.app", "Apple_Terminal", "Hyper" }) |known| {
+        inline for (&.{ "vscode", "ghostty", "kitty", "wezterm", "alacritty", "iTerm.app", "Apple_Terminal", "Hyper", "cosmic", "cosmic-terminal" }) |known| {
             if (std.ascii.eqlIgnoreCase(program, known)) return true;
         }
     }

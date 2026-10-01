@@ -96,9 +96,18 @@ fn computeLayout(vx: *vaxis.Vaxis, dialog: *const Dialog) Layout {
 }
 
 fn transmitImagePath(vx: *vaxis.Vaxis, io: std.Io, allocator: std.mem.Allocator, tty: *std.Io.Writer, path: []const u8) !vaxis.Image {
-    var read_buffer: [1024 * 1024]u8 = undefined;
-    var decoded = try vaxis.zigimg.Image.fromFilePath(allocator, io, path, &read_buffer);
+    const bytes = try std.Io.Dir.cwd().readFileAlloc(io, path, allocator, .limited(16 * 1024 * 1024));
+    defer allocator.free(bytes);
+    var decoded = try vaxis.zigimg.Image.fromMemory(allocator, bytes);
     defer decoded.deinit(allocator);
+    if (std.mem.startsWith(u8, bytes, "\x89PNG\r\n\x1a\n")) {
+        if (decoded.width > std.math.maxInt(u16) or decoded.height > std.math.maxInt(u16)) return error.ImageTooLarge;
+        const encoder = std.base64.standard.Encoder;
+        const encoded_buffer = try allocator.alloc(u8, encoder.calcSize(bytes.len));
+        defer allocator.free(encoded_buffer);
+        const encoded = encoder.encode(encoded_buffer, bytes);
+        return vx.transmitPreEncodedImage(tty, encoded, @intCast(decoded.width), @intCast(decoded.height), .png);
+    }
     return vx.transmitImage(allocator, tty, &decoded, .rgba);
 }
 

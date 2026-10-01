@@ -1,0 +1,30 @@
+[deck]
+title = Ziptail setup
+start = welcome
+
+[screen welcome]
+title = Welcome to Ziptail
+next = configuration
+transition = fade
+scale = large
+---
+A terminal UI that fits your workflow.
+
+Use the arrow keys or click Continue to move between screens.
+
+[screen configuration]
+title = Configuration ready
+previous = welcome
+next = summary
+transition = slide_left
+scale = large
+---
+Your settings have been collected.
+The next screen shows the generated summary.
+
+[screen summary]
+title = Setup summary
+previous = configuration
+transition = slide_left
+body_env = ZIPTAIL_INSTALL_OUTPUT
+---

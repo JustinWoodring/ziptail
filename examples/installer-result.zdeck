@@ -1,0 +1,26 @@
+[deck]
+title = Installer results
+start = complete
+result_env = ZIPTAIL_INSTALL_STATUS
+success_start = complete
+failure_start = failed
+
+[screen complete]
+title = Installation succeeded
+transition = fade
+scale = large
+body_env = ZIPTAIL_INSTALL_OUTPUT
+---
+The installer exited successfully.
+
+Press Enter to close this presentation.
+
+[screen failed]
+title = Installation failed
+transition = slide_left
+scale = large
+body_env = ZIPTAIL_INSTALL_OUTPUT
+---
+The installer returned a failure status.
+
+Review the captured output before retrying.
